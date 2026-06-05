@@ -4,7 +4,10 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true, required: true },
     email: { type: String, trim: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
+    googleId: { type: String },
+    authProvider: { type: String, enum: ["local", "google"], default: "local" },
+    avatar: { type: String },
     role: { type: Number, default: 0 },
   },
   { timestamps: true }

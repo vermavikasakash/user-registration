@@ -3,7 +3,6 @@ require("colors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const morgan = require("morgan");
-const authRoute = require("./routes/authRoute");
 const cors = require("cors")
 
 //rest object
@@ -12,12 +11,16 @@ const app = express();
 // configure env
 dotenv.config();
 
+const passport = require("./config/passport");
+const authRoute = require("./routes/authRoute");
+
 // db connect
 connectDB();
 
 //middlewares
 app.use(cors())
 app.use(express.json());
+app.use(passport.initialize());
 app.use(morgan("dev"));
 
 //routes
@@ -28,7 +31,7 @@ app.get("/", (req, res) => {
   res.send("<h1>Server is running for Machine Test</h1>");
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 const dev = process.env.DEV_MODE;
 
 app.listen(PORT, (err) => {

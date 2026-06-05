@@ -2,6 +2,30 @@ const { hashPassword, comparePassword } = require("../helpers/authHelper");
 const { User, Task } = require("../models/userModel");
 const JWT = require("jsonwebtoken");
 
+const createToken = (userId) =>
+  JWT.sign({ _id: userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
+const getAuthResponse = (user, message) => ({
+  status: true,
+  success: true,
+  message,
+  user: {
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    authProvider: user.authProvider,
+    avatar: user.avatar,
+  },
+  token: createToken(user._id),
+});
+
+const getClientUrl = () => process.env.CLIENT_URL || "http://localhost:3000";
+
+const getGoogleFailureUrl = () =>
+  `${getClientUrl()}/?googleLogin=failed`;
+
 const registerController = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -67,6 +91,13 @@ const loginController = async (req, res) => {
         message: "Email is not registered ",
       });
     }
+    if (!user.password) {
+      return res.status(200).send({
+        status: false,
+        success: false,
+        message: "This account uses Google sign-in. Please continue with Google.",
+      });
+    }
     // if registered check password
     const matched = await comparePassword(password, user.password);
     if (!matched) {
@@ -75,20 +106,7 @@ const loginController = async (req, res) => {
         message: "Invalid Password",
       });
     }
-    // Password matches
-    const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    res.status(200).send({
-      status: true,
-      message: "Successfully Login",
-      user: {
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      token,
-    });
+    res.status(200).send(getAuthResponse(user, "Successfully Login"));
   } catch (error) {
     console.log(error);
     res.status(500).send({
@@ -96,6 +114,26 @@ const loginController = async (req, res) => {
       message: "Error in Login",
       error,
     });
+  }
+};
+
+// ! GOOGLE CALLBACK CONTROLLER
+const googleCallbackController = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.redirect(getGoogleFailureUrl());
+    }
+
+    const authResponse = getAuthResponse(
+      req.user,
+      "Successfully signed in with Google"
+    );
+    const authData = encodeURIComponent(JSON.stringify(authResponse));
+
+    return res.redirect(`${getClientUrl()}/google-auth-success?auth=${authData}`);
+  } catch (error) {
+    console.log(error);
+    return res.redirect(getGoogleFailureUrl());
   }
 };
 
@@ -118,6 +156,8 @@ const logoutController = (req, res) => {
 module.exports = {
   registerController,
   loginController,
+  googleCallbackController,
+  getGoogleFailureUrl,
   logoutController,
   testController,
 };

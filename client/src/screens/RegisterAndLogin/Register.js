@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./Register.module.css";
 import {registerFunction} from "../../serviceApi/registerApi"
 import { AiOutlineEyeInvisible, AiOutlineEye } from "react-icons/ai";
+import GoogleSignInButton from "../../components/GoogleSignInButton/GoogleSignInButton";
 
 const Register = () => {
   // state
@@ -74,7 +75,12 @@ const Register = () => {
     <Layout>
       <div className={styles.register}>
         <h1>Register</h1>
-        <Form style={{ width: "30%" }} onSubmit={(e) => handleSubmit(e)}>
+        <p className={styles.authHint}>Create a password account, or sign in instantly with Google.</p>
+        <Form className={styles.authForm} onSubmit={(e) => handleSubmit(e)}>
+          <GoogleSignInButton />
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
           <Form.Group className="mb-3" controlId="formBasicName">
             <Form.Label>Name</Form.Label>
             <Form.Control
@@ -119,9 +125,14 @@ const Register = () => {
           {/* //? ERROR TEXT  */}
           {error && <p className={styles.errorText}>{error}</p>}
 
-          <Button variant="primary" type="submit">
-            Submit
-          </Button>
+          <div className={styles.login_bottom_btn}>
+            <Button variant="primary" type="submit">
+              Submit
+            </Button>
+            <Button variant="primary" onClick={() => navigate("/")}>
+              Login
+            </Button>
+          </div>
         </Form>
       </div>
     </Layout>

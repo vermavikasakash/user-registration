@@ -8,6 +8,7 @@ import styles from "./Register.module.css";
 import { AiOutlineEyeInvisible, AiOutlineEye } from "react-icons/ai";
 import Layout from "../../components/Layout/Layout";
 import { useAuth } from "../../context/authContext";
+import GoogleSignInButton from "../../components/GoogleSignInButton/GoogleSignInButton";
 
 const Login = () => {
   // state
@@ -73,7 +74,12 @@ const Login = () => {
     <Layout>
       <div className={styles.register}>
         <h1>Login</h1>
-        <Form style={{ width: "30%" }} onSubmit={(e) => handleSubmit(e)}>
+        <p className={styles.authHint}>Use your email and password, or continue with Google.</p>
+        <Form className={styles.authForm} onSubmit={(e) => handleSubmit(e)}>
+          <GoogleSignInButton />
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Email</Form.Label>
             <Form.Control
